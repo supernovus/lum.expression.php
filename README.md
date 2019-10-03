@@ -1,26 +1,29 @@
-# lum.file.php
+# lum.expression.php
 
 ## Summary
 
-File related utilities for the Lum library set.
+Expression parser library.
 
 ## Classes
 
-| Class                   | Description                                       |
-| ----------------------- | ------------------------------------------------- |
-| Lum\File                | A bunch of simple file helpers.                   |
-| Lum\File\CSV            | A simple CSV parser.                              |
-| Lum\File\Permissions    | A unix permissions parser and converter.          |
-| Lum\File\Stream         | A wrapper for PHP file streams.                   |
-| Lum\File\Types          | A really simplistic file type detector.           |
-| Lum\File\Zip            | A wrapper around the ZipArchive library.          |
+| Class                    | Description                                      |
+| ------------------------ | ------------------------------------------------ |
+| Lum\Expression\Parser    | The main expression parser library.              |
+| Lum\Expression\Condition | Child class for conditions.                      |
+| Lum\Expression\Operator  | Child class for operators.                       |
+
+## Tests
+
+Run `composer test` to run the tests.
+
+See the tests for examples of how the parser works.
 
 ## Official URLs
 
 This library can be found in two places:
 
- * [Github](https://github.com/supernovus/lum.file.php)
- * [Packageist](https://packagist.org/packages/lum/lum-file)
+ * [Github](https://github.com/supernovus/lum.expression.php)
+ * [Packageist](https://packagist.org/packages/lum/lum-expression)
 
 ## Author
 

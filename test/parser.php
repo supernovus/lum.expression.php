@@ -6,7 +6,7 @@ require_once 'vendor/autoload.php';
 
 \Lum\Test\Functional::start();
 
-plan(24);
+plan(26);
 
 $in =
 [
@@ -64,11 +64,21 @@ $operators =
   'not'  => ['precedence'=>2, 'unary'=>true, 'evaluate'=>true],
   'add'  => ['precedence'=>2, 'evaluate'=>true],
   'mult' => ['precedence'=>3, 'evaluate'=>true],
+  // An operator using a built-in evaluator but with a custom name.
   'negate' => ['precedence'=>4, 'unary'=>true, 'evaluate'=>'neg'],
+  // A custom operator.
   'sqrt'   => ['precedence'=>4, 'unary'=>true, 'evaluate'=>
     function($items)
     {
       return sqrt($items[0]);
+    }
+  ],
+  // One more custom operator that only works in prefix or postfix.
+  // There's currently no way to support operands > 2 in infix.
+  'ifelse' => ['precedence'=>1, 'operands'=>3, 'evaluate'=>
+    function ($items)
+    {
+      return ($items[0] ? $items[1] : $items[2]);
     }
   ],
 ];
@@ -130,6 +140,16 @@ $sqrt_exp = [9, 'sqrt'];
 $expy->loadPostfix($sqrt_exp);
 $sqrt_val = $expy->evaluate();
 is($sqrt_val, 3.0, 'custom operator evaluated');
+
+$ifelse_exp_1 = [2,1,'gt','first','second','ifelse'];
+$expy->loadPostfix($ifelse_exp_1);
+$ifelse_val = $expy->evaluate();
+is($ifelse_val, 'first', 'ternary operator with true');
+
+$ifelse_exp_2 = [1,2,'gt','first','second','ifelse'];
+$expy->loadPostfix($ifelse_exp_2);
+$ifelse_val = $expy->evaluate();
+is($ifelse_val, 'second', 'ternary operator with false');
 
 echo get_tap();
 return test_instance();
