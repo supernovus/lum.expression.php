@@ -4,7 +4,7 @@ namespace Lum\Expression;
 
 class Parser
 {
-  protected $data;
+  protected $data      = [];
   protected $operators = [];
 
   protected $lp = '(';

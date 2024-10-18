@@ -8,30 +8,45 @@ class Operator
   const ASSOC_LEFT  = 1;
   const ASSOC_RIGHT = 2;
 
-  public $name;
-  public $operands   = 2;
-  public $precedence = 1;
-  public $assoc      = self::ASSOC_LEFT;
+  public string $name;
+  public int $operands   = 2;
+  public int $precedence = 1;
+  public int $assoc      = self::ASSOC_LEFT;
 
   protected $evaluator;
 
-  public function __construct ($name, $opts=[])
+  public function __construct (string $name, array|bool|string $opts=[])
   {
-    $this->name = $name;
-    if (isset($opts['unary']) && $opts['unary'])
-    {
-      $this->operands = 1;
-      $this->assoc = self::ASSOC_RIGHT;
-    }
+    $builtins = Builtins::getInstance();
 
-    if (isset($opts['operands']) && is_int($opts['operands']))
+    $this->name = $name;
+
+    if ($opts === true && $builtins->has($name))
     {
-      $this->operands = $opts['operands'];
+      $opts = $builtins->getDef($name);
+    }
+    else if (is_string($opts) && $builtins->has($opts))
+    {
+      $opts = $builtins->getDef($opts);
+    }
+    else if (!is_array($opts))
+    {
+      throw new \Exception("invalid operator definition: ".serialize($opts));
     }
 
     if (isset($opts['precedence']) && is_numeric($opts['precedence']))
     {
       $this->precedence = $opts['precedence'];
+    }
+
+    if (isset($opts['unary']) && $opts['unary'])
+    {
+      $this->operands = 1;
+      $this->assoc = self::ASSOC_RIGHT;
+    }
+    elseif (isset($opts['operands']) && is_int($opts['operands']))
+    {
+      $this->operands = $opts['operands'];
     }
 
     if (isset($opts['assoc']))
@@ -85,17 +100,21 @@ class Operator
 
   public function setEvaluator ($evaluator)
   {
-    if (is_string($evaluator))
+    $builtins = Builtins::getInstance();
+
+    if (is_string($evaluator) && $builtins->has($evaluator))
     {
-      $evaluator = [$this, 'eval_'.strtolower($evaluator)];
+      $evaluator = $builtins->getEval($evaluator);
     }
+
     if (is_callable($evaluator))
     {
       $this->evaluator = $evaluator;
     }
     else
     {
-      throw new \Exception("Invalid evaluator passed to setEvaluator()");
+      throw new \Exception("Invalid evaluator passed to setEvaluator() "
+        . serialize($evaluator));
     }
   }
 
@@ -125,81 +144,6 @@ class Operator
     return call_user_func($this->evaluator, $items);
   }
 
-  protected function eval_not ($items)
-  { // Unary operator, only one item is used.
-    return !($items[0]);
-  }
-
-  protected function eval_eq ($items)
-  {
-    return ($items[0] == $items[1]);
-  }
-
-  protected function eval_ne ($items)
-  {
-    return ($items[0] != $items[1]);
-  }
-
-  protected function eval_gt ($items)
-  {
-    return ($items[0] > $items[1]);
-  }
-
-  protected function eval_lt ($items)
-  {
-    return ($items[0] < $items[1]);
-  }
-
-  protected function eval_gte ($items)
-  {
-    return ($items[0] >= $items[1]);
-  }
-
-  protected function eval_lte ($items)
-  {
-    return ($items[0] <= $items[1]);
-  }
-
-  protected function eval_and ($items)
-  {
-    return ($items[0] and $items[1]);
-  }
-
-  protected function eval_or ($items)
-  {
-    return ($items[0] or $items[1]);
-  }
-
-  protected function eval_xor ($items)
-  {
-    return ($items[0] xor $items[1]);
-  }
-
-  protected function eval_add ($items)
-  {
-    return ($items[0] + $items[1]);
-  }
-
-  protected function eval_sub ($items)
-  {
-    return ($items[0] - $items[1]);
-  }
-
-  protected function eval_mult ($items)
-  {
-    return ($items[0] * $items[1]);
-  }
-
-  protected function eval_div ($items)
-  {
-    return ($items[0] / $items[1]);
-  }
-
-  protected function eval_neg ($items)
-  { // Unary operator, only one item is used.
-    return ($items[0] * -1);
-  }
-
   public function leftAssoc ()
   {
     return $this->assoc === self::ASSOC_LEFT;
@@ -215,4 +159,3 @@ class Operator
     return $this->assoc === self::ASSOC_NONE;
   }
 }
-

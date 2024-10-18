@@ -4,10 +4,10 @@ namespace Lum\Expression;
 
 class Condition
 {
-  public $op;
-  public $items;
+  public Operator $op;
+  public array $items;
 
-  public function __construct (Operator $op, $items)
+  public function __construct (Operator $op, array $items)
   {
     $this->op = $op;
     $this->items = $items;
